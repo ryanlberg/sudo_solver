@@ -2,6 +2,8 @@ import pygame, sys, random
 import time
 pygame.init()
 
+sys.setrecursionlimit(10000)
+
 size = width, height = 600, 800
 
 white = (255, 255, 255)
@@ -78,41 +80,47 @@ class board():
 
     def __solve__(self, row, col):
          
-         #pygame.time.delay(50)
          
+        
          if self.solved():
              return
          if row <= 8:
             cur = self.gameboard[row][col]
-            for value in range(1, 10):
-                if not cur.get_isset():
-                    if value in self.cols[col] and value in self.rows[row] and value in self.block[cur.getblock()]:
-                        cur.set_val(value)
-                        self.cols[col].remove(value)
-                        self.rows[row].remove(value)
-                        self.block[cur.getblock()].remove(value)
-                        screen.fill(white)
-                        self.draw()
-                        pygame.display.update()
-                        if col == 8:
-                            self.__solve__(row+1, 0)
-                        else:
-                            self.__solve__(row, col+1)
-
-                        if self.solved():
-                            return
+            if not cur.get_isset():
+                for value in range(1, 10):
+                    
+                        if value in self.cols[col] and value in self.rows[row] and value in self.block[cur.getblock()]:
+                            cur.set_val(value)
+                            self.cols[col].remove(value)
+                            self.rows[row].remove(value)
+                            self.block[cur.getblock()].remove(value)
+                            screen.fill(white)
+                            self.draw()
                         
-                        else:
-                           
+                            if col == 8:
+                                self.__solve__(row+1, 0)
+                            else:
+                                self.__solve__(row, col+1)
+
+                            if self.solved():
+                                return
+                            
+                            
+                            cur.set_val(0)
                             self.cols[col].add(value)
                             self.rows[row].add(value)
                             self.block[cur.getblock()].add(value)
+                            pygame.display.update()
+            else:
+                if self.solved():
+                    return
+                if col == 8:
+                    self.__solve__(row+1, 0)
                 else:
-                    if col == 8:
-                        self.__solve__(row+1, 0)
-                    else:
-                        self.__solve__(row, col+1)
+                    self.__solve__(row, col+1)
+                    
             return 
+         
 
 
 
@@ -128,12 +136,17 @@ class sudokucell:
         self.col = col
         self.size = size
         self.isset = False
+        self.isstarted = False
+        self.color = black
 
     def draw(self, screen):
          border = 3
+         draw = ""
+         if not self.value == 0:
+             draw = str(self.value)
          cellrect = pygame.Rect(self.posx, self.posy, self.size, self.size)
-         pygame.draw.rect(screen, black, cellrect, border)
-         text_surf = font.render(str(self.value), True, black)
+         pygame.draw.rect(screen, self.color, cellrect, border)
+         text_surf = font.render(draw, True, black)
          midx = cellrect.centerx - 10
          midy = cellrect.centery - 18
          screen.blit(text_surf, (midx, midy))
@@ -179,9 +192,17 @@ class sudokucell:
             elif col >= 6 and col <= 8:
                 return 8
    
+    def click(self, screen):
+        self.color = (0, 128, 0)
+        self.draw(screen)
+        
+
     def __str__(self):
         return f'val: {self.value}, row: {self.row}, col: {self.col}, block: block: {self.getblock()}'
 
+    def update(self, value):
+       
+        self.value = value
 
 class button():
 
@@ -222,6 +243,7 @@ def setup_game():
     gameboard = board(sudokuboard)
     solve = button(gray, 390, 650, 120, 50, "solve")
     start = button(gray, 90, 650, 120, 50, "start")
+    gameboard.isstarted = True
     start.draw()
     solve.draw()
     gameboard.draw()
@@ -230,24 +252,67 @@ def setup_game():
 
 if __name__ == "__main__":
     gameboard, solve, start = setup_game()
+    cellselected = None
     while True:
 
         for event in pygame.event.get():
             mouse_pos = pygame.mouse.get_pos()
-
+            
+            
             if event.type == pygame.QUIT: sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = gameboard.translate_mouse_value(mouse_pos[0]), gameboard.translate_mouse_value(mouse_pos[1])
+                print(y, x)
                 if solve.isClicked(mouse_pos):
-
-                  
                     gameboard.solve()
                 
                 if start.isClicked(mouse_pos):
                     gameboard, solve, start = setup_game()
                     gameboard.setup_new_game() 
-               
-                #print(gameboard.translate_mouse_value(x), gameboard.translate_mouse_value(y))
+                
+                if y >= 0 and y <= 8 and x >= 0 and x <= 8:
+                    if cellselected:
+                        cellselected.color = black
+                    cellselected = gameboard.gameboard[x][y]
+                    cellselected.click(screen)
+                
+                   
+
+            if event.type == pygame.KEYDOWN:
+                if cellselected:
+    
+                    if event.key == pygame.K_1:                    
+                        cellselected.update(1)
+                    elif event.key == pygame.K_2:  
+                        cellselected.update(2)
+                    elif event.key == pygame.K_3:
+                       
+                        cellselected.update(3)
+                    elif event.key == pygame.K_4:
+                       
+                        cellselected.update(4)
+                    elif event.key == pygame.K_5:
+                       
+                        cellselected.update(5)
+                    elif event.key == pygame.K_6:
+                       
+                        cellselected.update(6)
+                    elif event.key == pygame.K_7:
+                        
+                        cellselected.update(7)
+                    elif event.key == pygame.K_8:
+                        
+                        cellselected.update(8)
+                    elif event.key == pygame.K_9:
+                        
+                        cellselected.update(9)
+                    cellselected.color = black
+                    cellselected = None
+                
+
+            
+            #print(gameboard.translate_mouse_value(x), gameboard.translate_mouse_value(y))
         screen.fill(white)
         solve.draw()
         start.draw()
