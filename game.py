@@ -1,16 +1,13 @@
-import pygame, sys
+import pygame
 pygame.init()
 
 import board
 import sudokucell
 import button
 
-sys.setrecursionlimit(10000)
-
 size = width, height = 600, 800
 white = (255, 255, 255)
 black = (0, 0, 0)
-
 
 screen = pygame.display.set_mode(size)
 
@@ -25,14 +22,13 @@ def setup_game():
             sudokuboard[x].append(sudokucell.sudokucell(x, y, x*cellsize + margin, y * cellsize + margin, cellsize))
 
     gameboard = board.board(screen, sudokuboard)
-    solve = button.button(screen, gray, 390, 650, 120, 50, "solve")
-    start = button.button(screen, gray, 90, 650, 120, 50, "start")
+    solve_button = button.button(screen, gray, 390, 650, 120, 50, "solve")
+    start_button = button.button(screen, gray, 90, 650, 120, 50, "start")
     gameboard.isstarted = True
-    start.draw()
-    solve.draw()
+    start_button.draw()
+    solve_button.draw()
     gameboard.draw()
-    return gameboard, solve, start
-
+    return gameboard, solve_button, start_button
 
 if __name__ == "__main__":
     gameboard, solve, start = setup_game()

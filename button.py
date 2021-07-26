@@ -22,6 +22,7 @@ class button():
         texty = self.y + (self.height//2 - button_text_surf.get_height()//2)
         self.screen.blit(button_text_surf, (textx, texty))
 
+    # True if the positon follas within the bounds of the button box, otherwise false.
     def isClicked(self, pos):
         if pos[0] > self.x and pos[0] < self.x + self.width:
             if pos[1] > self.y and pos[1] < self.y + self.height:

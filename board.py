@@ -18,19 +18,23 @@ class board():
             self.block[x] = set([x for x in range(1, 10)])
             self.rows[x] = set([x for x in range(1, 10)]) 
 
+    
     def translate_mouse_value(self, val):
         border = 30
         size = 60
         return (val-border) // (size)
+
+    
+    
+    # True if there are no values to add to a row, column or 3x3 block. otherwise false.
+    def solved(self):
+        return self.emptyrows() and self.emptycols() and self.emptyblocks()
 
     def emptyblocks(self):
         for x in self.block.keys():
             if len(self.block[x]) > 0:
                 return False
         return True
-    
-    def solved(self):
-        return self.emptyrows() and self.emptycols() and self.emptyblocks()
 
     def emptyrows(self):
         for x in self.rows.keys():
@@ -49,6 +53,7 @@ class board():
             for cell in row:
                 cell.draw(self.screen)
         
+    ## sets up a new game with a 20% chance of adding a value to a blcok for a new game.
     def setup_new_game(self):
         for i in range(len(self.gameboard)):
             for j in range(len(self.gameboard[i])):
@@ -67,6 +72,8 @@ class board():
     def solve(self):
         return self.__solve__(0, 0)
 
+    # 'Private' method for solving the current game board. This method uses the backtracking
+    # paradigm to solve the current game board using the inserted mandatory values.
     def __solve__(self, row, col):
          
          if self.solved():
@@ -75,7 +82,7 @@ class board():
             cur = self.gameboard[row][col]
             if not cur.get_isset():
                 for value in range(1, 10):
-                    
+                
                         if value in self.cols[col] and value in self.rows[row] and value in self.block[cur.getblock()]:
                             cur.set_val(value)
                             self.cols[col].remove(value)
@@ -91,7 +98,6 @@ class board():
 
                             if self.solved():
                                 return
-                            
                             
                             cur.set_val(0)
                             self.cols[col].add(value)
